@@ -1,0 +1,732 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🏓 Padel Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#0a0e1a;
+  --sidebar:#050810;
+  --surface:#0d1221;
+  --border:#1e2540;
+  --border2:#141929;
+  --text:#e8eaf0;
+  --text2:#8b92b0;
+  --text3:#4b5280;
+  --accent:#6366f1;
+  --accent2:#818cf8;
+  --accent-glow:rgba(99,102,241,.2);
+}
+html{scrollbar-width:thin;scrollbar-color:#1e2540 var(--bg)}
+body{font-family:'Space Grotesk',sans-serif;background:var(--bg);color:var(--text);display:flex;min-height:100vh;font-size:14px}
+
+/* ── SIDEBAR ── */
+aside{width:224px;background:var(--sidebar);border-right:1px solid var(--border2);display:flex;flex-direction:column;padding:20px 0;position:fixed;top:0;bottom:0;left:0;z-index:200}
+.logo{padding:0 20px 20px;font-size:17px;font-weight:700;color:var(--text);border-bottom:1px solid var(--border2);margin-bottom:12px;display:flex;align-items:center;gap:10px;letter-spacing:.02em}
+.logo-icon{width:34px;height:34px;background:linear-gradient(135deg,#6366f1,#8b5cf6);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0;box-shadow:0 4px 12px rgba(99,102,241,.4)}
+.nav-section{padding:16px 20px 6px;font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.14em}
+nav a{display:flex;align-items:center;gap:11px;padding:9px 20px;font-size:13px;font-weight:500;color:var(--text2);cursor:pointer;transition:.15s;text-decoration:none;border-left:3px solid transparent}
+nav a:hover{color:var(--text);background:rgba(99,102,241,.06)}
+nav a.on{color:var(--text);background:rgba(99,102,241,.1);border-left-color:var(--accent)}
+nav a .icon{font-size:15px;width:18px;text-align:center;opacity:.8}
+.venue-list{display:flex;flex-direction:column;gap:2px;padding:0 12px}
+.venue-item{display:flex;align-items:center;gap:9px;padding:7px 8px;border-radius:8px;font-size:12px;font-weight:500;color:var(--text2);cursor:pointer;transition:.13s}
+.venue-item:hover{background:rgba(255,255,255,.04);color:var(--text)}
+.venue-item.on{background:rgba(99,102,241,.1);color:var(--text)}
+.vdot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.venue-count{margin-left:auto;font-size:10px;color:var(--text3);font-family:'Space Mono',monospace}
+.sidebar-footer{margin-top:auto;padding:16px 20px;border-top:1px solid var(--border2);font-size:11px;color:var(--text3)}
+
+/* ── MAIN ── */
+main{margin-left:224px;flex:1;display:flex;flex-direction:column;min-height:100vh}
+
+/* TOPBAR */
+.topbar{background:var(--sidebar);border-bottom:1px solid var(--border2);padding:14px 28px;display:flex;align-items:center;gap:14px;position:sticky;top:0;z-index:100}
+.page-title{font-size:16px;font-weight:700;color:var(--text);letter-spacing:-.01em}
+.topbar-right{margin-left:auto;display:flex;gap:10px;align-items:center}
+.search-wrap{position:relative}
+.search-wrap .icon{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--text3);font-size:13px;pointer-events:none}
+input[type=text]{background:var(--surface);border:1.5px solid var(--border);border-radius:8px;color:var(--text);padding:8px 14px 8px 34px;font-size:13px;font-family:'Space Grotesk',sans-serif;outline:none;width:220px;transition:.15s}
+input[type=text]:focus{border-color:var(--accent);background:#0f1630}
+input[type=text]::placeholder{color:var(--text3)}
+select{background:var(--surface);border:1.5px solid var(--border);border-radius:8px;color:var(--text);padding:7px 12px;font-size:13px;font-family:'Space Grotesk',sans-serif;outline:none;cursor:pointer;transition:.15s}
+select:focus{border-color:var(--accent)}
+.pill{padding:6px 14px;border-radius:20px;font-size:12px;font-weight:600;cursor:pointer;border:1.5px solid var(--border);background:transparent;color:var(--text2);transition:.13s;font-family:'Space Grotesk',sans-serif}
+.pill:hover,.pill.on{background:var(--accent);color:#fff;border-color:var(--accent);box-shadow:0 0 12px var(--accent-glow)}
+
+/* STATS */
+.stats{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;padding:20px 28px 4px}
+.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px 18px;position:relative;overflow:hidden;transition:.15s}
+.stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--accent),#8b5cf6)}
+.stat-card .val{font-size:24px;font-weight:700;color:var(--accent2);font-family:'Space Mono',monospace;letter-spacing:-.02em}
+.stat-card .lbl{font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.1em;margin-top:4px}
+
+/* SECTION HEADER */
+.sec{padding:20px 28px 28px}
+.sec-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+.sec-title{font-size:14px;font-weight:700;color:var(--text);display:flex;align-items:center;gap:8px}
+.sec-count{font-size:11px;color:var(--accent2);font-family:'Space Mono',monospace;font-weight:400;background:var(--accent-glow);padding:2px 8px;border-radius:10px}
+
+/* CONTROLS */
+.controls{padding:0 28px 16px;display:flex;gap:8px;flex-wrap:wrap;align-items:center;border-bottom:1px solid var(--border2);margin-bottom:0}
+.ctrl-label{font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.1em;margin-right:2px}
+
+/* GRID */
+.vid-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:14px}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;cursor:pointer;transition:all .18s;text-decoration:none;display:block}
+.card:hover{border-color:var(--accent);transform:translateY(-3px);box-shadow:0 8px 28px rgba(0,0,0,.4),0 0 0 1px var(--accent)}
+.thumb{position:relative;aspect-ratio:16/9;background:#000;overflow:hidden}
+.thumb img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .3s}
+.card:hover .thumb img{transform:scale(1.04)}
+.play-overlay{position:absolute;inset:0;background:rgba(0,0,0,0);display:flex;align-items:center;justify-content:center;transition:.2s}
+.card:hover .play-overlay{background:rgba(0,0,0,.3)}
+.play-circle{width:42px;height:42px;border-radius:50%;background:rgba(99,102,241,.9);display:flex;align-items:center;justify-content:center;opacity:0;transform:scale(.7);transition:.2s;box-shadow:0 0 20px rgba(99,102,241,.6)}
+.card:hover .play-circle{opacity:1;transform:scale(1)}
+.play-circle svg{width:16px;height:16px;fill:#fff;margin-left:2px}
+.dur-badge{position:absolute;bottom:8px;right:8px;background:rgba(0,0,0,.85);color:#fff;font-size:10px;font-family:'Space Mono',monospace;font-weight:700;padding:2px 6px;border-radius:5px;letter-spacing:.02em}
+.short-tag{position:absolute;top:8px;left:8px;background:#f59e0b;color:#000;font-size:9px;font-weight:700;padding:2px 7px;border-radius:4px;letter-spacing:.04em}
+.card-body{padding:12px 14px}
+.vtag{display:inline-block;padding:2px 9px;border-radius:6px;font-size:10px;font-weight:600;margin-bottom:7px;letter-spacing:.01em}
+.v-desa{background:rgba(139,92,246,.15);color:#a78bfa;border:1px solid rgba(139,92,246,.25)}
+.v-378{background:rgba(249,115,22,.15);color:#fb923c;border:1px solid rgba(249,115,22,.25)}
+.v-court{background:rgba(34,197,94,.15);color:#4ade80;border:1px solid rgba(34,197,94,.25)}
+.v-orange{background:rgba(234,179,8,.15);color:#facc15;border:1px solid rgba(234,179,8,.25)}
+.v-raxa{background:rgba(239,68,68,.15);color:#f87171;border:1px solid rgba(239,68,68,.25)}
+.v-atlas{background:rgba(14,165,233,.15);color:#38bdf8;border:1px solid rgba(14,165,233,.25)}
+.v-hive{background:rgba(245,158,11,.15);color:#fbbf24;border:1px solid rgba(245,158,11,.25)}
+.v-verde{background:rgba(16,185,129,.15);color:#34d399;border:1px solid rgba(16,185,129,.25)}
+.v-other{background:rgba(99,102,241,.1);color:var(--accent2);border:1px solid rgba(99,102,241,.2)}
+.card-title{font-size:12px;font-weight:600;color:var(--text);line-height:1.4;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:5px}
+.card-meta{font-size:11px;color:var(--text2);display:flex;align-items:center;gap:8px}
+.card-date{font-family:'Space Mono',monospace;font-size:10px;color:var(--text3)}
+
+/* EMPTY STATE */
+.empty{text-align:center;padding:80px 20px;color:var(--text3)}
+.empty .emoji{font-size:48px;margin-bottom:16px}
+.empty p{font-size:14px}
+
+/* HAMBURGER BUTTON */
+.ham-btn{display:none;background:none;border:none;cursor:pointer;padding:6px;color:var(--text);font-size:20px;line-height:1;flex-shrink:0}
+
+/* SIDEBAR OVERLAY */
+.sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:199;opacity:0;transition:opacity .25s}
+.sidebar-overlay.open{opacity:1}
+
+/* ── MOBILE ── */
+@media(max-width:768px){
+  body{display:block}
+  /* sidebar: off-canvas */
+  aside{transform:translateX(-100%);transition:transform .25s cubic-bezier(.4,0,.2,1);z-index:200;width:260px}
+  aside.open{transform:translateX(0)}
+  .sidebar-overlay{display:block;pointer-events:none}
+  .sidebar-overlay.open{pointer-events:auto}
+  /* main full-width */
+  main{margin-left:0}
+  /* topbar: compact */
+  .topbar{padding:11px 16px;gap:10px;flex-wrap:wrap}
+  .ham-btn{display:flex;align-items:center;justify-content:center}
+  .topbar-right{gap:8px;width:100%;flex-wrap:wrap}
+  input[type=text]{width:100%;font-size:14px}
+  select{flex:1;min-width:120px;font-size:13px}
+  /* stats: 2 cols */
+  .stats{grid-template-columns:repeat(2,1fr);gap:10px;padding:14px 16px 4px}
+  .stat-card .val{font-size:20px}
+  /* controls: scroll horizontal */
+  .controls{padding:10px 16px;gap:8px;overflow-x:auto;flex-wrap:nowrap;-webkit-overflow-scrolling:touch}
+  .controls::-webkit-scrollbar{display:none}
+  /* grid: 1–2 cols */
+  .vid-grid{grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px}
+  .sec{padding:14px 16px 24px}
+  /* timeline mini-grid */
+  .sesi-vids{grid-template-columns:repeat(auto-fill,minmax(150px,1fr))}
+}
+
+@media(max-width:480px){
+  .vid-grid{grid-template-columns:1fr 1fr}
+  .stats{grid-template-columns:1fr 1fr}
+  .page-title{font-size:14px}
+}
+
+/* ── VIDEO MODAL ── */
+.modal-wrap{position:fixed;inset:0;z-index:999;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.88);opacity:0;pointer-events:none;transition:opacity .22s}
+.modal-wrap.open{opacity:1;pointer-events:auto}
+.modal-box{position:relative;width:min(900px,96vw);max-height:96vh}
+.modal-box iframe{width:100%;aspect-ratio:16/9;border:0;border-radius:12px;display:block;background:#000}
+.modal-close{position:absolute;top:-40px;right:0;background:none;border:none;color:#fff;font-size:28px;cursor:pointer;line-height:1;opacity:.7;transition:.15s;padding:4px 8px}
+.modal-close:hover{opacity:1}
+.modal-info{margin-top:12px;color:var(--text2);font-size:13px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.modal-title{color:var(--text);font-size:14px;font-weight:600}
+.modal-yt{margin-left:auto;color:var(--accent2);font-size:12px;text-decoration:none;border:1px solid var(--border);border-radius:6px;padding:4px 10px;transition:.13s}
+.modal-yt:hover{background:var(--accent);border-color:var(--accent);color:#fff}
+
+/* TIMELINE */
+.timeline{display:flex;flex-direction:column;gap:20px}
+.sesi-block{border:1px solid var(--border);border-radius:12px;overflow:hidden}
+.sesi-hdr{background:var(--surface);padding:14px 18px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;transition:.13s}
+.sesi-hdr:hover{background:#111830}
+.sesi-hdr-left{display:flex;align-items:center;gap:12px}
+.sesi-hdr-date{font-size:14px;font-weight:700;color:var(--accent2);font-family:'Space Mono',monospace}
+.sesi-hdr-meta{font-size:11px;color:var(--text3);font-family:'Space Mono',monospace}
+.sesi-vids{padding:14px;display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px;background:rgba(0,0,0,.2)}
+.mini-card{background:var(--surface);border:1px solid var(--border);border-radius:8px;overflow:hidden;cursor:pointer;text-decoration:none;display:block;transition:.13s}
+.mini-card:hover{border-color:var(--accent);transform:translateY(-2px)}
+.mini-thumb{position:relative;aspect-ratio:16/9;overflow:hidden;background:#000}
+.mini-thumb img{width:100%;height:100%;object-fit:cover;display:block}
+.mini-dur{position:absolute;bottom:5px;right:5px;background:rgba(0,0,0,.85);color:#fff;font-size:9px;font-family:'Space Mono',monospace;padding:1px 5px;border-radius:3px}
+.mini-body{padding:8px 10px}
+.mini-title{font-size:11px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside>
+  <div class="logo">
+    <div class="logo-icon">🏓</div>
+    Padel Group
+  </div>
+  <nav>
+    <div class="nav-section">Menu</div>
+    <a href="#" class="on" onclick="setView('grid',this)"><span class="icon">🎬</span>Semua Video</a>
+    <a href="#" onclick="setView('timeline',this)"><span class="icon">📅</span>Timeline Sesi</a>
+    <a href="#" onclick="setView('stats',this)"><span class="icon">📊</span>Statistik</a>
+  </nav>
+  <div class="nav-section">Venue</div>
+  <div class="venue-list" id="venue-list"></div>
+  <div class="sidebar-footer">
+    241 video · 2025–2026
+  </div>
+</aside>
+
+<!-- SIDEBAR OVERLAY -->
+<div class="sidebar-overlay" id="sidebar-overlay" onclick="closeSidebar()"></div>
+
+<!-- VIDEO MODAL -->
+<div class="modal-wrap" id="modal" onclick="closeModal(event)">
+  <div class="modal-box">
+    <button class="modal-close" onclick="closeModal()">✕</button>
+    <iframe id="modal-iframe" allowfullscreen allow="autoplay; fullscreen"></iframe>
+    <div class="modal-info">
+      <span class="modal-title" id="modal-title"></span>
+      <a class="modal-yt" id="modal-yt" target="_blank" rel="noopener">Buka YouTube ↗</a>
+    </div>
+  </div>
+</div>
+
+<!-- MAIN -->
+<main>
+  <!-- TOPBAR -->
+  <div class="topbar">
+    <button class="ham-btn" id="ham-btn" onclick="openSidebar()" aria-label="Menu">☰</button>
+    <div class="page-title">Video Library</div>
+    <div class="topbar-right">
+      <div class="search-wrap">
+        <span class="icon">🔍</span>
+        <input type="text" id="q" placeholder="Cari judul, venue, tanggal..." oninput="render()">
+      </div>
+      <select id="sel-month" onchange="render()">
+        <option value="">Semua Bulan</option>
+        <option value="2026-08">Agustus 2026</option>
+        <option value="2026-07">Juli 2026</option>
+        <option value="2026-06">Juni 2026</option>
+        <option value="2026-05">Mei 2026</option>
+        <option value="2026-04">April 2026</option>
+        <option value="2026-03">Maret 2026</option>
+        <option value="2026-02">Februari 2026</option>
+        <option value="2026-01">Januari 2026</option>
+        <option value="2025-12">Desember 2025</option>
+        <option value="2025-11">November 2025</option>
+        <option value="2025-10">Oktober 2025</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- STATS -->
+  <div class="stats" id="stats-row">
+    <div class="stat-card"><div class="val" id="s-total">–</div><div class="lbl">Total Video</div></div>
+    <div class="stat-card"><div class="val" id="s-dur">–</div><div class="lbl">Total Durasi</div></div>
+    <div class="stat-card"><div class="val" id="s-sesi">–</div><div class="lbl">Sesi Unik</div></div>
+    <div class="stat-card"><div class="val" id="s-avg">–</div><div class="lbl">Rata-rata/Sesi</div></div>
+    <div class="stat-card"><div class="val" id="s-venue">–</div><div class="lbl">Venue</div></div>
+  </div>
+
+  <!-- CONTROLS -->
+  <div class="controls">
+    <span class="ctrl-label">Durasi:</span>
+    <button class="pill on" id="p-all" onclick="setDur('all')">Semua</button>
+    <button class="pill" id="p-full" onclick="setDur('full')">Full (&gt;1j)</button>
+    <button class="pill" id="p-short" onclick="setDur('short')">Clip (&lt;1j)</button>
+  </div>
+
+  <!-- CONTENT -->
+  <div class="sec">
+    <div class="sec-header">
+      <div class="sec-title" id="sec-title">Semua Video <span class="sec-count" id="sec-count">–</span></div>
+    </div>
+    <div id="content"></div>
+  </div>
+</main>
+
+<script>
+// ── DATA ──
+const VIDEOS = [
+
+  // ── AGUSTUS 2026 ──
+  {id:"TL9T9ex0nhc",dur:"2:18:22",title:"Aug 25, 2026",date:"2026-08-25"},
+  {id:"iRA9CGX4BGY",dur:"3:10:29",title:"Aug 25, 2026",date:"2026-08-25"},
+  {id:"xoqisNjY5Wk",dur:"3:12:37",title:"Aug 25, 2026",date:"2026-08-25"},
+  {id:"cNdynCGeFws",dur:"2:32:28",title:"Aug 23, 2026",date:"2026-08-23"},
+  {id:"AZy_5rbJUXA",dur:"2:13:59",title:"Aug 20, 2026",date:"2026-08-20"},
+  {id:"7gMVLU8E2_I",dur:"2:16:03",title:"Aug 20, 2026",date:"2026-08-20"},
+  {id:"9-LC337BTBs",dur:"2:11:49",title:"Aug 20, 2026",date:"2026-08-20"},
+  {id:"jmxh2ASNj4k",dur:"2:12:43",title:"Aug 20, 2026",date:"2026-08-20"},
+  {id:"NoYqxInZaBE",dur:"1:49:07",title:"Aug 17, 2026",date:"2026-08-17"},
+  {id:"s0sY6q9-FNY",dur:"2:08:06",title:"Desa Padel 17 Aug 2026",date:"2026-08-17"},
+  {id:"ANjOp9WYKj8",dur:"2:04:21",title:"Desa Padel 17 Aug 2026",date:"2026-08-17"},
+  {id:"wBGMrLeFsqI",dur:"13:13",title:"Desa Padel Aug 17 (klip)",date:"2026-08-17"},
+  {id:"va49OiJt3os",dur:"1:49:07",title:"378 Aug 17, 2026",date:"2026-08-17"},
+  {id:"bdjC0omQiR8",dur:"2:52:18",title:"378 Aug 17, 2026",date:"2026-08-17"},
+  {id:"S8VKaZd3PK0",dur:"39:55",title:"378 Aug 17 (klip)",date:"2026-08-17"},
+  {id:"HUyHaRSkqng",dur:"2:55:13",title:"378 Aug 17, 2026",date:"2026-08-17"},
+  {id:"7iF6oP-l3_c",dur:"2:47:56",title:"378 Aug 17, 2026",date:"2026-08-17"},
+  {id:"oFdNYCszLx4",dur:"2:05:52",title:"Aug 13, 2026",date:"2026-08-13"},
+  {id:"-0yNCrAGOsA",dur:"2:07:13",title:"Aug 13, 2026",date:"2026-08-13"},
+  {id:"hMKnYcaZBkM",dur:"1:37:29",title:"Aug 13, 2026",date:"2026-08-13"},
+  {id:"oi9nDtGjEfY",dur:"2:06:48",title:"Aug 13, 2026",date:"2026-08-13"},
+  {id:"tmOoez83kM8",dur:"2:36:11",title:"Aug 10, 2026",date:"2026-08-10"},
+  {id:"GyvdigJ9Ra8",dur:"2:36:29",title:"Court 2 — Aug 10, 2026",date:"2026-08-10"},
+  {id:"Gdx4Lb7KJL8",dur:"2:35:38",title:"Court 1 — Aug 10, 2026",date:"2026-08-10"},
+  {id:"uHYEwZviDGQ",dur:"2:12:25",title:"Aug 6, 2026",date:"2026-08-06"},
+  {id:"TH87hDUMK1Q",dur:"1:58:24",title:"Aug 6, 2026",date:"2026-08-06"},
+  {id:"4pdvb1roK5E",dur:"2:07:57",title:"Aug 6, 2026",date:"2026-08-06"},
+  {id:"6N9iYljgHH8",dur:"19:59",title:"Aug 6 (klip)",date:"2026-08-06"},
+  {id:"GdO5GgutQio",dur:"2:21:34",title:"Aug 3, 2026",date:"2026-08-03"},
+  {id:"87ExlxvhkiY",dur:"2:14:12",title:"Aug 3, 2026",date:"2026-08-03"},
+  {id:"b-QGAmPLPhI",dur:"2:21:24",title:"Aug 3, 2026",date:"2026-08-03"},
+  // ── JULI 2026 ──
+  {id:"hmFM8Z2Jq9A",dur:"1:44:23",title:"Court 3 — Jul 30, 2026",date:"2026-07-30"},
+  {id:"E7N7VNd9kPw",dur:"1:43:38",title:"Court 2 — Jul 30, 2026",date:"2026-07-30"},
+  {id:"vxg3g_CMELk",dur:"1:19:04",title:"Court 1 — Jul 30, 2026",date:"2026-07-30"},
+  {id:"WWvXlYWtgPs",dur:"1:44:04",title:"Court 4 — Jul 26, 2026",date:"2026-07-26"},
+  {id:"J5AYcb7PDrA",dur:"2:17:34",title:"Jul 26, 2026",date:"2026-07-26"},
+  {id:"LzwyK14v2zA",dur:"2:14:25",title:"Jul 26, 2026",date:"2026-07-26"},
+  {id:"0OUI8y4JnbY",dur:"1:58:48",title:"Jul 26, 2026",date:"2026-07-26"},
+  {id:"7vqfYCBOpGI",dur:"1:47:13",title:"Jul 23, 2026",date:"2026-07-23"},
+  {id:"bbLT31Xn0eE",dur:"1:38:45",title:"Jul 23, 2026",date:"2026-07-23"},
+  {id:"mW0x5e5Kthc",dur:"1:47:22",title:"Jul 23, 2026",date:"2026-07-23"},
+  {id:"agh3uSNM2x8",dur:"1:48:28",title:"Jul 23, 2026",date:"2026-07-23"},
+  {id:"hVCzeWd_ac0",dur:"1:58:44",title:"Court 2 — Jul 16, 2026",date:"2026-07-16"},
+  {id:"2QHpg7vV0Jw",dur:"2:00:00",title:"Court 1 — Jul 16, 2026",date:"2026-07-16"},
+  {id:"PF978vgYJcA",dur:"1:37:00",title:"Court 4 — Jul 16, 2026",date:"2026-07-16"},
+  {id:"tyLnW703b5Y",dur:"1:58:35",title:"Court 3 — Jul 16, 2026",date:"2026-07-16"},
+  {id:"9Uzbc-hXsFw",dur:"1:06:32",title:"Jul 15, 2026",date:"2026-07-15"},
+  {id:"9zb7dKISNNA",dur:"2:58:53",title:"Jul 1, 2026",date:"2026-07-01"},
+  {id:"jI_dI21YB94",dur:"2:36:37",title:"Jul 1, 2026",date:"2026-07-01"},
+  {id:"r-7GG4zqSoA",dur:"11:24",title:"Jul 1 (klip)",date:"2026-07-01"},
+  // ── JUNI 2026 ──
+  {id:"EAdXM2IJH34",dur:"2:08:41",title:"Jun 15, 2026",date:"2026-06-15"},
+  {id:"TdnPZJTAk7Q",dur:"2:09:05",title:"Jun 15, 2026",date:"2026-06-15"},
+  {id:"LMI-3bvpQoM",dur:"1:55:13",title:"Court 3 — Jun 11, 2026",date:"2026-06-11"},
+  {id:"L8JEM2qOOSo",dur:"1:55:16",title:"Court 4 — Jun 11, 2026",date:"2026-06-11"},
+  {id:"Q8KCqrXqcrw",dur:"2:10:07",title:"Court 1 — Jun 11, 2026",date:"2026-06-11"},
+  {id:"qE-e76bjGf0",dur:"2:11:14",title:"Court 2 — Jun 11, 2026",date:"2026-06-11"},
+  {id:"Nqr8YOw7N-g",dur:"1:42:50",title:"Jun 4, 2026",date:"2026-06-04"},
+  {id:"5y3nzBAimeg",dur:"1:56:03",title:"Jun 4, 2026",date:"2026-06-04"},
+  {id:"Nc7EiJZv4yk",dur:"1:56:18",title:"Jun 4, 2026",date:"2026-06-04"},
+  {id:"91TfMeJKvfU",dur:"8:46",title:"Jun 4 (klip)",date:"2026-06-04"},
+  // ── MEI 2026 ──
+  {id:"iq6PQAYBiT8",dur:"1:59:23",title:"May 30, 2026",date:"2026-05-30"},
+  {id:"IRd-waYVCgU",dur:"2:51:57",title:"May 30, 2026",date:"2026-05-30"},
+  {id:"eJM4pvX6x7U",dur:"1:31:35",title:"May 30, 2026",date:"2026-05-30"},
+  {id:"h8YARVxDYos",dur:"1:31:35",title:"May 30, 2026",date:"2026-05-30"},
+  {id:"Qd8jmgspI5Y",dur:"8:30",title:"May 30 (klip)",date:"2026-05-30"},
+  {id:"dk6NJB5ABp0",dur:"1:14:38",title:"May 29, 2026",date:"2026-05-29"},
+  {id:"7oX46Xg4tfo",dur:"2:19:50",title:"May 28, 2026",date:"2026-05-28"},
+  {id:"sZHRvkA6C5Y",dur:"2:09:22",title:"May 28, 2026",date:"2026-05-28"},
+  {id:"4YFCYNq4zE0",dur:"2:09:23",title:"May 28, 2026",date:"2026-05-28"},
+  {id:"iThpe95YIzk",dur:"1:32:37",title:"May 28, 2026",date:"2026-05-28"},
+  {id:"foKmE5k_7Kk",dur:"2:00:58",title:"May 26, 2026",date:"2026-05-26"},
+  {id:"8jUXhCIpM5c",dur:"2:02:03",title:"May 26, 2026",date:"2026-05-26"},
+  {id:"7wCh6pItzlM",dur:"1:56:37",title:"May 26, 2026",date:"2026-05-26"},
+  {id:"tkvDyM8cXo0",dur:"1:59:53",title:"May 21, 2026",date:"2026-05-21"},
+  {id:"lee9qddZnuo",dur:"1:49:18",title:"May 21, 2026",date:"2026-05-21"},
+  {id:"vUwi3TM-Tsc",dur:"24:39",title:"May 21 (klip)",date:"2026-05-21"},
+  {id:"BP-io94vkWM",dur:"1:14:33",title:"May 21, 2026",date:"2026-05-21"},
+  {id:"vugwybDmB-M",dur:"2:02:17",title:"May 21, 2026",date:"2026-05-21"},
+  {id:"ZtsspfktzGI",dur:"2:05:50",title:"May 14, 2026",date:"2026-05-14"},
+  {id:"X3UGc3bG1ok",dur:"2:04:03",title:"May 14, 2026",date:"2026-05-14"},
+  {id:"0RpC5Uq7qMU",dur:"2:04:15",title:"May 14, 2026",date:"2026-05-14"},
+  {id:"srXADXxV8Js",dur:"1:59:46",title:"May 12, 2026",date:"2026-05-12"},
+  {id:"714bZPFd7TE",dur:"2:01:19",title:"May 11, 2026",date:"2026-05-11"},
+  {id:"VOJml7kut6k",dur:"2:02:40",title:"May 11, 2026",date:"2026-05-11"},
+  {id:"rTTrzO5dNdo",dur:"2:00:35",title:"May 7, 2026",date:"2026-05-07"},
+  {id:"kAYgdq-nX2I",dur:"2:04:12",title:"May 7, 2026",date:"2026-05-07"},
+  {id:"PCl_Nu8eqGQ",dur:"1:52:12",title:"May 7, 2026",date:"2026-05-07"},
+  {id:"RZUWjACZ3Pc",dur:"2:00:02",title:"May 7, 2026",date:"2026-05-07"},
+  {id:"ePxqktSXKQI",dur:"2:15:43",title:"May 3, 2026",date:"2026-05-03"},
+  {id:"SUFiJTvXfdw",dur:"2:25:13",title:"May 3, 2026",date:"2026-05-03"},,
+{id:"GpTakHHQ9HA", dur:"2:04:08", title:"February 12, 2026", date:"2026-02-12"},
+  {id:"E9zgTQlQSbU", dur:"2:06:27", title:"February 12, 2026", date:"2026-02-12"},
+  {id:"_Nzl-xrt1ac", dur:"1:57:33", title:"Court 3 February 2026", date:"2026-02-03"},
+  {id:"Sxr4hldAjFs", dur:"1:53:30", title:"Court 1 Feb 5, 2026", date:"2026-02-05"},
+  {id:"6hQ0cmfdjVo", dur:"1:57:01", title:"Court 4 February 2026", date:"2026-02-04"},
+  {id:"Wk7ToBcavuQ", dur:"1:58:28", title:"Court 2 Feb 5, 2026", date:"2026-02-05"},
+  {id:"po9FyVSY4Rs", dur:"1:53:39", title:"Court 2 January 29, 2026", date:"2026-01-29"},
+  {id:"cL8E1xneW90", dur:"41:48", title:"Court 4 29 January 2026", date:"2026-01-29"},
+  {id:"RS9aIvcKFrU", dur:"55:08", title:"Court 4 29 January 2026", date:"2026-01-29"},
+  {id:"oyvoDL6tUP4", dur:"1:40:50", title:"Court 3 January 29, 2026", date:"2026-01-29"},
+  {id:"ZF6MEOPIcpc", dur:"2:51:33", title:"January 24, 2026", date:"2026-01-24"},
+  {id:"DQ1QjoWKrxs", dur:"46:38", title:"January 24, 2026", date:"2026-01-24"},
+  {id:"HCa72ny9qiQ", dur:"1:29:28", title:"January 24, 2026", date:"2026-01-24"},
+  {id:"iwRb_ksiWzI", dur:"23:02", title:"January 24, 2026", date:"2026-01-24"},
+  {id:"N2OgFqy2vq8", dur:"22:10", title:"24 January 2026", date:"2026-01-24"},
+  {id:"-jr55mOBnVg", dur:"2:01:58", title:"January 22, 2026", date:"2026-01-22"},
+  {id:"yJUwdTeZuDg", dur:"2:00:16", title:"January 22, 2026", date:"2026-01-22"},
+  {id:"BW6XBROuNg0", dur:"2:01:16", title:"January 22, 2026", date:"2026-01-22"},
+  {id:"-5V00wLOEEs", dur:"1:43:11", title:"Court 4 22 January 2026", date:"2026-01-22"},
+  {id:"NTFzhFl_2B4", dur:"2:43:05", title:"January 20, 2026", date:"2026-01-20"},
+  {id:"eE1ySpPGrjk", dur:"19:56", title:"15 January 2026", date:"2026-01-15"},
+  {id:"oes0uYPNsDs", dur:"57:40", title:"15 January 2026", date:"2026-01-15"},
+  {id:"uboQmGZyu-8", dur:"16:34", title:"15 January 2026", date:"2026-01-15"},
+  {id:"HuxPzKxNo74", dur:"2:01:27", title:"January 15, 2026", date:"2026-01-15"},
+  {id:"5myJbiWbo0Y", dur:"1:58:47", title:"January 15, 2026", date:"2026-01-15"},
+  {id:"WhpthoRbAiE", dur:"1:48:11", title:"January 15, 2026", date:"2026-01-15"},
+  {id:"-YqRSW2hjaM", dur:"11:03", title:"January 15, 2026", date:"2026-01-15"},
+  {id:"ujzUlkzXPSg", dur:"1:58:21", title:"January 14, 2026", date:"2026-01-14"},
+  {id:"ieFgwWolIcc", dur:"1:57:47", title:"January 14, 2026", date:"2026-01-14"},
+  {id:"4lxuiKMTNGo", dur:"1:21:04", title:"January 8, 2026", date:"2026-01-08"},
+  {id:"H-xGFTPwHXw", dur:"1:26:22", title:"January 8, 2026", date:"2026-01-08"},
+  {id:"KzhqxCQkC5U", dur:"1:29:02", title:"January 8, 2026", date:"2026-01-08"},
+  {id:"jDl9WHMcVKo", dur:"32:10", title:"8 January 2026", date:"2026-01-08"},
+  {id:"HXXUlHiXzW4", dur:"1:03:51", title:"January 7, 2026", date:"2026-01-07"},
+  {id:"4GrJori6Yk4", dur:"2:18:01", title:"January 5, 2026", date:"2026-01-05"},
+  {id:"1yF6NREqIM4", dur:"1:42:39", title:"January 3, 2026", date:"2026-01-03"},
+  {id:"9TxoW8pc4_I", dur:"1:42:02", title:"January 3, 2026", date:"2026-01-03"},
+  {id:"QizTSHz4JSQ", dur:"2:03:42", title:"January 1, 2026", date:"2026-01-01"},
+  {id:"zbZnLBxiV_Q", dur:"56:09", title:"January 1, 2026", date:"2026-01-01"},
+  {id:"3nHhNGKsV5E", dur:"2:00:43", title:"December 30, 2025", date:"2025-12-30"},
+  {id:"see7xTvKV6Q", dur:"48:02", title:"30 December 2025", date:"2025-12-30"},
+  {id:"iVtE7erorAs", dur:"1:36:46", title:"December 27, 2025", date:"2025-12-27"},
+  {id:"AMxEeTj8MQ4", dur:"23:24", title:"December 27, 2025", date:"2025-12-27"},
+  {id:"Rf80k-zgy4A", dur:"2:20:40", title:"December 25, 2025", date:"2025-12-25"},
+  {id:"rFsAx-S4OiM", dur:"1:42:10", title:"16 December 2025", date:"2025-12-16"},
+  {id:"Dh9cqgCJFPk", dur:"1:57:24", title:"December 11, 2025 Court 2", date:"2025-12-11"},
+  {id:"hdodWNHM16U", dur:"1:58:14", title:"December 11, 2025 Court 4", date:"2025-12-11"},
+  {id:"7KZRqbtwhHI", dur:"1:59:09", title:"December 11, 2025 Court 1", date:"2025-12-11"},
+  {id:"chs7AP3141M", dur:"1:55:42", title:"11 December 2025 Court 3", date:"2025-12-11"},
+  {id:"HBHsZOr3_UA", dur:"2:00:30", title:"December 4, 2025 Court 4", date:"2025-12-04"},
+  {id:"13YFajn-U-s", dur:"2:17:20", title:"December 4, 2025 Court 1", date:"2025-12-04"},
+  {id:"04LlFWN8ZfE", dur:"2:19:44", title:"December 4, 2025 Court 2", date:"2025-12-04"},
+  {id:"HA8iiuHtA-I", dur:"1:14:11", title:"4 December 2025 Court 3", date:"2025-12-04"},
+  {id:"VcTUslgDtug", dur:"1:46:57", title:"27 November 2025 Court 1", date:"2025-11-27"},
+  {id:"POgw-ugSci4", dur:"2:09:11", title:"November 27, 2025 Court 2", date:"2025-11-27"},
+  {id:"Ub-VbwDtIcE", dur:"1:58:06", title:"November 27, 2025 Court 4", date:"2025-11-27"},
+  {id:"A47nebCHSRw", dur:"2:07:17", title:"November 27, 2025 Court 3", date:"2025-11-27"},
+  {id:"uMZwxH0UwIk", dur:"3:01:07", title:"Orange Garden 22 Nov 2025", date:"2025-11-22"},
+  {id:"r2oxWlQJq-8", dur:"1:40:53", title:"Orange Garden 22 Nov 2025", date:"2025-11-22"},
+  {id:"q5OwnKJ9Njk", dur:"1:21:11", title:"Orange Garden 22 Nov 2025", date:"2025-11-22"},
+  {id:"mzzbgAzOyP4", dur:"38:06", title:"Orange Garden 22 Nov 2025", date:"2025-11-22"},
+  {id:"MfSDBYs39V4", dur:"20:08", title:"Orange Garden 22 Nov 2025", date:"2025-11-22"},
+  {id:"Tm-0kE8Nc08", dur:"11:33", title:"Orange Garden 22 Nov 2025", date:"2025-11-22"},
+  {id:"rUWwFbZJfyo", dur:"1:54:05", title:"Orange Garden 20 Nov 2025", date:"2025-11-20"},
+  {id:"z7c0aagIUQI", dur:"1:12:15", title:"Orange Garden 20 Nov 2025", date:"2025-11-20"},
+  {id:"j_r47dwgDnE", dur:"44:25", title:"Orange Garden 20 Nov 2025", date:"2025-11-20"},
+  {id:"ivc31HoNxZo", dur:"1:58:58", title:"Orange Garden 20 Nov 2025", date:"2025-11-20"},
+  {id:"kHS1AVlxDQs", dur:"1:47:29", title:"Orange Garden 20 Nov 2025", date:"2025-11-20"},
+  {id:"fKVjyjI4kAE", dur:"2:04:44", title:"Atlas 18 Nov 2025", date:"2025-11-18"},
+  {id:"fRi1X8taYYQ", dur:"9:04", title:"18 November 2025", date:"2025-11-18"},
+  {id:"fEI1I3eKZic", dur:"1:51:56", title:"Atlas Padel 17 Nov 2025", date:"2025-11-17"},
+  {id:"_3yEKwn4Sjo", dur:"2:05:00", title:"Atlas Padel 17 Nov 2025", date:"2025-11-17"},
+  {id:"CinKQQZqDwo", dur:"2:05:13", title:"Atlas Padel 17 Nov 2025", date:"2025-11-17"},
+  {id:"lQ7BfeGioJo", dur:"1:20:01", title:"Verde 17 Nov 2025", date:"2025-11-17"},
+  {id:"PnuhCH2ngOI", dur:"1:20:11", title:"Verde 17 Nov 2025", date:"2025-11-17"},
+  {id:"zstv9TuHzC0", dur:"1:33:17", title:"Orange Garden 13 Nov 2025", date:"2025-11-13"},
+  {id:"1GeZH5-5RHo", dur:"1:57:18", title:"Orange Garden 13 Nov 2025", date:"2025-11-13"},
+  {id:"4zsIB17K3dc", dur:"1:57:56", title:"Orange Garden 13 Nov 2025", date:"2025-11-13"},
+  {id:"aBacy8xIb44", dur:"1:40:39", title:"Raxa 11 Nov 2025", date:"2025-11-11"},
+  {id:"THHC1vH6yfs", dur:"1:37:40", title:"Orange Garden 6 Nov 2025", date:"2025-11-06"},
+  {id:"_AcM9iP0ufw", dur:"1:57:56", title:"Orange Garden 6 Nov 2025", date:"2025-11-06"},
+  {id:"AgAL4d4DPFM", dur:"1:56:04", title:"Orange Garden 6 Nov 2025", date:"2025-11-06"},
+  {id:"TEtke-lngTY", dur:"1:13:27", title:"Coach Asep 3 Nov 2025", date:"2025-11-03"},
+  {id:"-rJ-bcPX5nM", dur:"1:13:44", title:"Coach Asep 3 Nov 2025", date:"2025-11-03"},
+  {id:"yTYmTIYcaTM", dur:"48:16", title:"Coach Asep 3 Nov 2025", date:"2025-11-03"},
+  {id:"lkc04mByPxc", dur:"26:01", title:"Coach Asep 3 Nov 2025", date:"2025-11-03"},
+  {id:"fhxZFVFBWuw", dur:"2:00:46", title:"Orange Garden 1 Nov 2025", date:"2025-11-01"},
+  {id:"JElz2VlVtOI", dur:"2:00:13", title:"Orange Garden 1 Nov 2025", date:"2025-11-01"},
+  {id:"6ISfjvzDFfY", dur:"32:45", title:"Orange Garden 1 Nov 2025", date:"2025-11-01"},
+  {id:"osebJLwotAQ", dur:"1:48:08", title:"Raxa 30 Okt 2025", date:"2025-10-30"},
+  {id:"ELCat4cbq1o", dur:"2:00:29", title:"Raxa 30 Okt 2025", date:"2025-10-30"},
+  {id:"vlkcrriaGNE", dur:"1:59:13", title:"Raxa 30 Okt 2025", date:"2025-10-30"},
+  {id:"dj8NMvY7aeI", dur:"59:14", title:"Raxa 29 Okt 2025", date:"2025-10-29"},
+  {id:"UZwiAHqEp3o", dur:"25:28", title:"Raxa 25 Okt 2025", date:"2025-10-25"},
+  {id:"gj5dfo2Mwnc", dur:"41:38", title:"Raxa 25 Okt 2025", date:"2025-10-25"},
+  {id:"klFvsGylPqQ", dur:"2:06:53", title:"Raxa 25 Okt 2025", date:"2025-10-25"},
+  {id:"WnFlaS8yMZs", dur:"16:49", title:"Raxa 23 Okt 2025", date:"2025-10-23"},
+  {id:"cmWXdf5-Cbs", dur:"1:39:30", title:"Raxa 23 Okt 2025", date:"2025-10-23"},
+  {id:"-cfhQqWrnOU", dur:"1:06:04", title:"Raxa 23 Okt 2025", date:"2025-10-23"},
+  {id:"xppOZbU6fYA", dur:"2:00:43", title:"Raxa 23 Okt 2025", date:"2025-10-23"},
+  {id:"FnH-RBu81-U", dur:"49:34", title:"Tennis 23 Okt 2025", date:"2025-10-23"},
+  {id:"4cXd14-tj1g", dur:"1:23:06", title:"Hive 20 Okt 2025", date:"2025-10-20"},
+  {id:"bdvHf1OLnKU", dur:"1:16:28", title:"Hive 20 Okt 2025", date:"2025-10-20"},
+  {id:"vqxyr8qZkqE", dur:"1:58:03", title:"Raxa 16 Okt 2025", date:"2025-10-16"},
+  {id:"37coveZS9HI", dur:"2:00:01", title:"Raxa 16 Okt 2025", date:"2025-10-16"},
+  {id:"xZQGARWldhQ", dur:"59:54", title:"Tennis 9 Okt 2025", date:"2025-10-09"},
+  {id:"ZfIuA4J_NYk", dur:"2:27:46", title:"Raxa 14 Okt 2025", date:"2025-10-14"},
+  {id:"VrsfPZAamU4", dur:"1:56:59", title:"Hive 13 Okt 2025", date:"2025-10-13"},
+  {id:"n6T5f1Lud5s", dur:"1:55:03", title:"Hive 13 Okt 2025", date:"2025-10-13"},
+  {id:"oXPttekxhgE", dur:"24:51", title:"Raxa 9 Okt 2025", date:"2025-10-09"},
+  {id:"WC5rXn0hd10", dur:"25:24", title:"Raxa 9 Okt 2025", date:"2025-10-09"},
+  {id:"ToSR8nPYBdM", dur:"8:07", title:"Raxa 9 Okt 2025", date:"2025-10-09"},
+  {id:"VkBmr3s3jrs", dur:"21:45", title:"Raxa 9 Okt 2025", date:"2025-10-09"},
+  {id:"EJfuSeNQaUk", dur:"11:12", title:"Raxa 9 Okt 2025", date:"2025-10-09"},
+  {id:"eqvNbvUNvgI", dur:"6:33", title:"Raxa 9 Okt 2025", date:"2025-10-09"},
+  {id:"FtwzFNVj2-Q", dur:"6:42", title:"Raxa 9 Okt 2025", date:"2025-10-09"},
+  {id:"u7Uv4b1R8Kg", dur:"20:32", title:"Raxa 9 Okt 2025", date:"2025-10-09"},
+  {id:"xL3EQEJBuhE", dur:"21:22", title:"Raxa 9 Okt 2025", date:"2025-10-09"},
+  {id:"VkrmnoTOYUw", dur:"8:44", title:"Raxa 9 Okt 2025", date:"2025-10-09"},
+  {id:"RVxFwDRVcUw", dur:"11:08", title:"Raxa 9 Okt 2025", date:"2025-10-09"},
+  {id:"q5KcXj9KcME", dur:"12:39", title:"Raxa 9 Okt 2025", date:"2025-10-09"},
+  {id:"biy80FkdmqA", dur:"10:38", title:"Raxa 9 Okt 2025", date:"2025-10-09"},
+  {id:"9TJSvloOjhI", dur:"3:02", title:"Raxa 9 Okt 2025", date:"2025-10-09"},
+  {id:"OXvVPtflgr4", dur:"3:26", title:"Raxa 9 Okt 2025", date:"2025-10-09"},
+  {id:"Lh8yDkw3N6Q", dur:"12:34", title:"Raxa 9 Okt 2025", date:"2025-10-09"},
+  {id:"-0KO5L98GCo", dur:"59:54", title:"Tennis 9 Okt 2025", date:"2025-10-09"},
+  {id:"FMMxZq0mkT8", dur:"1:50:54", title:"Hive 6 Okt 2025", date:"2025-10-06"},
+  {id:"FcOed9iK800", dur:"1:53:13", title:"Hive 6 Okt 2025", date:"2025-10-06"},
+  {id:"atwkY4180x8", dur:"8:40", title:"378 CupCupWaw 4 Okt 2025", date:"2025-10-04"},
+  {id:"4a910hcXhe4", dur:"10:00", title:"378 CupCupWaw 4 Okt 2025", date:"2025-10-04"},
+  {id:"ek78Vx3DhvU", dur:"9:33", title:"378 CupCupWaw 4 Okt 2025", date:"2025-10-04"},
+  {id:"PTBzhscd0ss", dur:"8:40", title:"378 CupCupWaw 4 Okt 2025", date:"2025-10-04"},
+  {id:"VGlBqV6MIqI", dur:"9:56", title:"378 CupCupWaw 4 Okt 2025", date:"2025-10-04"},
+  {id:"lx_oIiKXoVA", dur:"8:01", title:"378 CupCupWaw 4 Okt 2025", date:"2025-10-04"},
+  {id:"d2t2pQjiD58", dur:"9:39", title:"378 CupCupWaw 4 Okt 2025", date:"2025-10-04"},
+  {id:"ovdCJC0N84A", dur:"6:33", title:"378 CupCupWaw 4 Okt 2025", date:"2025-10-04"},
+  {id:"bewkVmrRiQQ", dur:"8:53", title:"378 CupCupWaw 4 Okt 2025", date:"2025-10-04"},
+  {id:"Ug329xxfPsE", dur:"9:03", title:"378 CupCupWaw 4 Okt 2025", date:"2025-10-04"},
+  {id:"C6HcEV2h49k", dur:"1:15", title:"378 CupCupWaw 4 Okt 2025", date:"2025-10-04"},
+  {id:"eE939QN1rtI", dur:"3:34", title:"378 CupCupWaw 4 Okt 2025", date:"2025-10-04"},
+  {id:"NV_bjhn11Mo", dur:"8:39", title:"378 CupCupWaw 4 Okt 2025", date:"2025-10-04"},
+  {id:"Xv_Noc5HoZY", dur:"7:10", title:"378 CupCupWaw 4 Okt 2025", date:"2025-10-04"},
+  {id:"LaCEw2Rp-n8", dur:"8:58", title:"378 CupCupWaw 4 Okt 2025", date:"2025-10-04"},
+  {id:"-TTt4MICYnA", dur:"8:37", title:"378 CupCupWaw 4 Okt 2025", date:"2025-10-04"},
+  {id:"m_3C0GfG1zY", dur:"8:37", title:"378 CupCupWaw 4 Okt 2025", date:"2025-10-04"},
+  {id:"PDMsXIIqy5E", dur:"8:37", title:"378 CupCupWaw 4 Okt 2025", date:"2025-10-04"},
+  {id:"S7a_zgDBodo", dur:"8:43", title:"378 CupCupWaw 4 Okt 2025", date:"2025-10-04"},
+  {id:"YY_JhiBMBZI", dur:"8:27", title:"378 CupCupWaw 4 Okt 2025", date:"2025-10-04"},
+  {id:"74R0iQOCuho", dur:"8:23", title:"378 CupCupWaw 4 Okt 2025", date:"2025-10-04"},
+  {id:"M6cTiEMijZg", dur:"8:44", title:"378 CupCupWaw 4 Okt 2025", date:"2025-10-04"}
+
+];
+
+// ── VENUE CONFIG ──
+const VENUES = [
+  {key:'desa', label:'Desa Padel', color:'#a78bfa', dot:'#8b5cf6'},
+  {key:'378',  label:'378',        color:'#fb923c', dot:'#f97316'},
+  {key:'court',label:'Court',      color:'#4ade80', dot:'#22c55e'},
+  {key:'orange',label:'Orange Garden',color:'#facc15',dot:'#eab308'},
+  {key:'raxa', label:'Raxa',       color:'#f87171', dot:'#ef4444'},
+  {key:'atlas',label:'Atlas',      color:'#38bdf8', dot:'#0ea5e9'},
+  {key:'hive', label:'Hive',       color:'#fbbf24', dot:'#f59e0b'},
+  {key:'verde',label:'Verde',      color:'#34d399', dot:'#10b981'},
+  {key:'other',label:'Lainnya',    color:'#818cf8', dot:'#6366f1'},
+];
+
+function getVenue(v){
+  const t = v.title.toLowerCase();
+  if(t.includes('desa padel')||t.includes('desa')) return 'desa';
+  if(t.includes('378')) return '378';
+  if(t.includes('court')) return 'court';
+  if(t.includes('orange garden')||t.includes('orange')) return 'orange';
+  if(t.includes('raxa')) return 'raxa';
+  if(t.includes('atlas')) return 'atlas';
+  if(t.includes('hive')) return 'hive';
+  if(t.includes('verde')) return 'verde';
+  return 'other';
+}
+
+function durToSec(d){
+  const p = d.split(':').map(Number);
+  return p.length===3 ? p[0]*3600+p[1]*60+p[2] : p[0]*60+p[1];
+}
+function secToHM(s){
+  const h=Math.floor(s/3600), m=Math.floor((s%3600)/60);
+  return h>0 ? h+'j '+(m?m+'m':'') : m+'m';
+}
+function isShort(v){ return durToSec(v.dur) < 3600; }
+function thumb(id){ return 'https://i.ytimg.com/vi/'+id+'/mqdefault.jpg'; }
+function ytUrl(id){ return 'https://www.youtube.com/watch?v='+id; }
+
+// ── STATE ──
+let durFilter = 'all';
+let activeVenue = '';
+let activeView = 'grid';
+
+// ── SIDEBAR VENUE LIST ──
+function buildSidebar(){
+  const counts = {};
+  VIDEOS.forEach(v => { const ve=getVenue(v); counts[ve]=(counts[ve]||0)+1; });
+  const el = document.getElementById('venue-list');
+  const allCount = VIDEOS.length;
+  el.innerHTML = `<div class="venue-item ${activeVenue===''?'on':''}" onclick="setVenue('')">
+    <div class="vdot" style="background:#6366f1"></div>
+    <span>Semua</span>
+    <span class="venue-count">${allCount}</span>
+  </div>` + VENUES.filter(v=>counts[v.key]).map(v=>`
+    <div class="venue-item ${activeVenue===v.key?'on':''}" onclick="setVenue('${v.key}')">
+      <div class="vdot" style="background:${v.dot}"></div>
+      <span>${v.label}</span>
+      <span class="venue-count">${counts[v.key]||0}</span>
+    </div>`).join('');
+}
+
+// ── FILTERS ──
+function setVenue(v){ activeVenue=v; buildSidebar(); render(); }
+function setDur(d){
+  durFilter=d;
+  ['all','full','short'].forEach(x=>document.getElementById('p-'+x).classList.toggle('on',x===d));
+  render();
+}
+function setView(v, el){
+  activeView=v;
+  document.querySelectorAll('nav a').forEach(a=>a.classList.remove('on'));
+  if(el) el.classList.add('on');
+  render();
+}
+
+function getFiltered(){
+  const q = document.getElementById('q').value.toLowerCase().trim();
+  const mon = document.getElementById('sel-month').value;
+  return VIDEOS.filter(v=>{
+    if(q && !v.title.toLowerCase().includes(q) && !v.date.includes(q)) return false;
+    if(mon && !v.date.startsWith(mon)) return false;
+    if(activeVenue && getVenue(v)!==activeVenue) return false;
+    if(durFilter==='full' && isShort(v)) return false;
+    if(durFilter==='short' && !isShort(v)) return false;
+    return true;
+  });
+}
+
+// -- VIDEO MODAL --
+function openModal(id, title){
+  document.getElementById('modal-iframe').src = 'https://www.youtube.com/embed/'+id+'?autoplay=1&rel=0';
+  document.getElementById('modal-title').textContent = title;
+  document.getElementById('modal-yt').href = 'https://www.youtube.com/watch?v='+id;
+  document.getElementById('modal').classList.add('open');
+  document.body.style.overflow='hidden';
+}
+function closeModal(e){
+  if(e && e.target !== document.getElementById('modal') && !e.target.classList.contains('modal-close')) return;
+  document.getElementById('modal').classList.remove('open');
+  document.getElementById('modal-iframe').src='';
+  document.body.style.overflow='';
+}
+document.addEventListener('keydown',function(e){ if(e.key==='Escape') closeModal({target:document.getElementById('modal')}); });
+
+// -- CARD HTML --
+function cardHtml(v, mini=false){
+  const ve = getVenue(v), vcfg = VENUES.find(x=>x.key===ve)||VENUES[VENUES.length-1];
+  const short = isShort(v);
+  const safeTitle = v.title.replace(/'/g,"&#39;");
+  if(mini) return `<div class="mini-card" onclick="openModal('${v.id}','${safeTitle}')" style="cursor:pointer">
+    <div class="mini-thumb"><img src="${thumb(v.id)}" loading="lazy"><div class="mini-dur">${v.dur}</div></div>
+    <div class="mini-body"><div class="mini-title">${v.title}</div></div>
+  </div>`;
+  return `<div class="card" onclick="openModal('${v.id}','${safeTitle}')" style="cursor:pointer">
+    <div class="thumb">
+      <img src="${thumb(v.id)}" loading="lazy">
+      <div class="play-overlay"><div class="play-circle"><svg viewBox="0 0 16 16"><polygon points="3,1 15,8 3,15"/></svg></div></div>
+      <div class="dur-badge">${v.dur}</div>
+      ${short?'<div class="short-tag">CLIP</div>':''}
+    </div>
+    <div class="card-body">
+      <div class="vtag v-${ve}">${vcfg.label}</div>
+      <div class="card-title">${v.title}</div>
+      <div class="card-meta"><span class="card-date">${v.date}</span></div>
+    </div>
+  </div>`;
+}
+
+// ── STATS ──
+function updateStats(vids){
+  const totalSec = vids.reduce((a,v)=>a+durToSec(v.dur),0);
+  const dates = [...new Set(vids.map(v=>v.date))];
+  const venues = [...new Set(vids.map(getVenue))];
+  const avgSec = dates.length ? totalSec/dates.length : 0;
+  document.getElementById('s-total').textContent = vids.length;
+  document.getElementById('s-dur').textContent = secToHM(totalSec);
+  document.getElementById('s-sesi').textContent = dates.length;
+  document.getElementById('s-avg').textContent = secToHM(avgSec);
+  document.getElementById('s-venue').textContent = venues.length;
+}
+
+// ── RENDER ──
+function render(){
+  const vids = getFiltered();
+  updateStats(vids);
+  document.getElementById('sec-count').textContent = vids.length + ' video';
+  const content = document.getElementById('content');
+  if(!vids.length){
+    content.innerHTML = '<div class="empty"><div class="emoji">🔍</div><p>Tidak ada video yang cocok.</p></div>';
+    return;
+  }
+  if(activeView==='grid'){
+    document.getElementById('sec-title').childNodes[0].textContent = 'Video ';
+    content.innerHTML = '<div class="vid-grid">'+vids.map(v=>cardHtml(v)).join('')+'</div>';
+  } else if(activeView==='timeline'){
+    document.getElementById('sec-title').childNodes[0].textContent = 'Timeline ';
+    const byDate = {};
+    vids.forEach(v=>{ if(!byDate[v.date]) byDate[v.date]=[]; byDate[v.date].push(v); });
+    content.innerHTML = '<div class="timeline">'+Object.entries(byDate).map(([date,dvids])=>{
+      const totalSec = dvids.reduce((a,v)=>a+durToSec(v.dur),0);
+      return `<div class="sesi-block">
+        <div class="sesi-hdr">
+          <div class="sesi-hdr-left">
+            <div class="sesi-hdr-date">${date}</div>
+            <div class="sesi-hdr-meta">${dvids.length} video · ${secToHM(totalSec)}</div>
+          </div>
+        </div>
+        <div class="sesi-vids">${dvids.map(v=>cardHtml(v,true)).join('')}</div>
+      </div>`;
+    }).join('')+'</div>';
+  } else {
+    // stats view
+    const venues = {};
+    vids.forEach(v=>{ const ve=getVenue(v); if(!venues[ve]) venues[ve]={count:0,sec:0}; venues[ve].count++; venues[ve].sec+=durToSec(v.dur); });
+    content.innerHTML = '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px">'+
+      Object.entries(venues).map(([ve,d])=>{
+        const vcfg = VENUES.find(x=>x.key===ve)||VENUES[VENUES.length-1];
+        return `<div class="stat-card"><div class="val" style="color:${vcfg.color}">${d.count}</div><div class="lbl">${vcfg.label}</div><div style="font-size:11px;color:var(--text3);margin-top:4px;font-family:'Space Mono',monospace">${secToHM(d.sec)}</div></div>`;
+      }).join('')+'</div>';
+  }
+}
+
+// ── INIT ──
+buildSidebar();
+render();
+
+// ── MOBILE SIDEBAR ──
+function openSidebar(){
+  document.querySelector('aside').classList.add('open');
+  document.getElementById('sidebar-overlay').classList.add('open');
+  document.body.style.overflow='hidden';
+}
+function closeSidebar(){
+  document.querySelector('aside').classList.remove('open');
+  document.getElementById('sidebar-overlay').classList.remove('open');
+  document.body.style.overflow='';
+}
+// close sidebar when a venue/nav item is tapped on mobile
+document.querySelectorAll('nav a').forEach(a=>a.addEventListener('click',()=>{
+  if(window.innerWidth<=768) closeSidebar();
+}));
+document.addEventListener('DOMContentLoaded',()=>{
+  document.getElementById('venue-list').addEventListener('click',()=>{
+    if(window.innerWidth<=768) closeSidebar();
+  });
+});
+</script>
+</body>
+</html>
